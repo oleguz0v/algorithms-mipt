@@ -1,3 +1,8 @@
+/*
+Реализовать бинарную кучу на минимум с дополнением в виде DecreaseKey
+(уменьшить число, вставленное на i-м запросе, на целое число x >= 0)
+*/
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,65 +12,71 @@ class Heap {
   std::vector<std::pair<long long, long long>> heap_;
   std::vector<int> indexMap_;
 
-  void SiftUp(int el) {
-    while (heap_[el].first < heap_[(el - 1) / 2].first) {
-      std::swap(heap_[el], heap_[(el - 1) / 2]);
-      std::swap(indexMap_[heap_[el].second],
-                indexMap_[heap_[(el - 1) / 2].second]);
-      el = (el - 1) / 2;
-    }
-  }
-
-  void SiftDown(int el, int n) {
-    while (2 * el + 2 < n and
-           heap_[el].first >
-               std::min(heap_[2 * el + 1].first, heap_[2 * el + 2].first)) {
-      if (heap_[2 * el + 1].first < heap_[2 * el + 2].first) {
-        std::swap(heap_[el], heap_[2 * el + 1]);
-        std::swap(indexMap_[heap_[el].second],
-                  indexMap_[heap_[2 * el + 1].second]);
-        el = 2 * el + 1;
-      } else {
-        std::swap(heap_[el], heap_[2 * el + 2]);
-        std::swap(indexMap_[heap_[el].second],
-                  indexMap_[heap_[2 * el + 2].second]);
-        el = 2 * el + 2;
-      }
-    }
-    if (2 * el + 1 < n and heap_[el].first > heap_[2 * el + 1].first) {
-      std::swap(heap_[el], heap_[2 * el + 1]);
-      std::swap(indexMap_[heap_[el].second],
-                indexMap_[heap_[2 * el + 1].second]);
-    }
-  }
+  void SiftUp(int el);
+  void SiftDown(int el, int n);
 
  public:
-  Heap(int size) { indexMap_.resize(size, -1); }
-
-  void Insert(long long value, int index) {
-    std::pair<long long, int> element = {value, index};
-    heap_.push_back(element);
-    indexMap_[index] = (int)heap_.size() - 1;
-    SiftUp((int)heap_.size() - 1);
-  }
-
-  void ExtractMin() {
-    heap_[0] = heap_.back();
-    heap_.pop_back();
-    if (!heap_.empty()) {
-      indexMap_[heap_[0].second] = 0;
-      SiftDown(0, (int)heap_.size());
-    }
-  }
-
-  long long GetMin() { return heap_[0].first; }
-
-  void DecreaseKey(int op_index, long long delta) {
-    int heap_index = indexMap_[op_index - 1];
-    heap_[heap_index].first -= delta;
-    SiftUp(heap_index);
-  }
+  explicit Heap(int size);
+  void Insert(long long value, int index);
+  void ExtractMin();
+  const long long GetMin();
+  void DecreaseKey(int op_index, long long delta);
 };
+
+Heap::Heap(int size) { indexMap_.resize(size, -1); }
+
+void Heap::SiftUp(int el) {
+  int pr = (el - 1) / 2;
+  while (heap_[el].first < heap_[pr].first) {
+    std::swap(heap_[el], heap_[pr]);
+    std::swap(indexMap_[heap_[el].second], indexMap_[heap_[pr].second]);
+    el = pr;
+    pr = (el - 1) / 2;
+  }
+}
+
+void Heap::SiftDown(int el, int n) {
+  int l = 2 * el + 1;
+  int r = 2 * el + 2;
+  while (l < n) {
+    int smallest = l;
+    if (r < n and heap_[r].first < heap_[l].first) {
+      smallest = r;
+    }
+    if (heap_[el].first <= heap_[smallest].first) {
+      return;
+    }
+    std::swap(heap_[el], heap_[smallest]);
+    std::swap(indexMap_[heap_[el].second], indexMap_[heap_[smallest].second]);
+    el = smallest;
+    l = 2 * el + 1;
+    r = 2 * el + 2;
+  }
+}
+
+void Heap::Insert(long long value, int index) {
+  std::pair<long long, int> element = {value, index};
+  heap_.push_back(element);
+  indexMap_[index] = (int)heap_.size() - 1;
+  SiftUp((int)heap_.size() - 1);
+}
+
+void Heap::ExtractMin() {
+  heap_[0] = heap_.back();
+  heap_.pop_back();
+  if (!heap_.empty()) {
+    indexMap_[heap_[0].second] = 0;
+    SiftDown(0, (int)heap_.size());
+  }
+}
+
+const long long Heap::GetMin() { return heap_[0].first; }
+
+void Heap::DecreaseKey(int op_index, long long delta) {
+  int heap_index = indexMap_[op_index - 1];
+  heap_[heap_index].first -= delta;
+  SiftUp(heap_index);
+}
 
 int main() {
   int q;
