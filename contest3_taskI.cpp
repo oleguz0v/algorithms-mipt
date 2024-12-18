@@ -1,26 +1,20 @@
-#include <algorithm>
-#include <cmath>
+/*
+ Дан массив a. Требуется для каждого запроса l, r, x, y найти
+ количество элементов на отрезке массива с l по r, значения
+ которых лежат  в отрезке [x, y].
+ */
+
 #include <iostream>
-#include <map>
-#include <set>
-#include <string>
 #include <vector>
 
 using std::cin;
 using std::cout;
 using std::endl;
-using std::pair;
-using std::string;
 using std::vector;
 
 class SegmentTree {
  public:
-  SegmentTree(vector<int>& array) {
-    n_ = (int)array.size();
-    a_ = array;
-    tree_.resize(4 * n_);
-    Build(0, 0, n_);
-  }
+  SegmentTree(vector<int>& array);
 
   size_t CountInRange(int q_l, int q_r, int x);
 
@@ -35,6 +29,13 @@ class SegmentTree {
   size_t Query(int i, int l, int r, int q_l, int q_r, int x);
   size_t static CountLessOrEqual(vector<int>& node, int x);
 };
+
+SegmentTree::SegmentTree(vector<int>& array) {
+  n_ = (int)array.size();
+  a_ = array;
+  tree_.resize(4 * n_);
+  Build(0, 0, n_);
+}
 
 void SegmentTree::Build(int i, int l, int r) {
   tree_[i].push_back(0);
@@ -53,7 +54,7 @@ size_t SegmentTree::CountInRange(int q_l, int q_r, int x) {
 }
 
 void SegmentTree::MergeNodes(vector<int>& left, vector<int>& right,
-                       vector<int>& parent) {
+                             vector<int>& parent) {
   size_t p1 = 0;
   size_t p2 = 0;
   while (p1 < left.size() and p2 < right.size()) {
@@ -72,10 +73,10 @@ void SegmentTree::MergeNodes(vector<int>& left, vector<int>& right,
 }
 
 size_t SegmentTree::Query(int i, int l, int r, int q_l, int q_r, int x) {
-  if (q_r <= l || r <= q_l) {
+  if (q_r <= l or r <= q_l) {
     return 0;
   }
-  if (q_l <= l && r <= q_r) {
+  if (q_l <= l and r <= q_r) {
     return CountLessOrEqual(tree_[i], x);
   }
   int m = (l + r) / 2;
