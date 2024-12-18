@@ -2,14 +2,8 @@
 В этой задаче вам предстоит реализовать очередь с поддержкой минимума.
 */
 
-#include <algorithm>
-#include <cmath>
 #include <deque>
 #include <iostream>
-#include <map>
-#include <set>
-#include <string>
-#include <vector>
 
 class QueueWithMin {
  private:
