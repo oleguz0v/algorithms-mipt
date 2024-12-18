@@ -1,13 +1,9 @@
 /*
-Реализовать структура данных для нахождения второго максимума на отрезке (усложненные спарсы)
+Реализовать структура данных для нахождения второго максимума на отрезке
+(усложненные спарсы)
 */
 
-#include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <map>
-#include <set>
-#include <string>
 #include <vector>
 
 const int cInf = 1e9;
@@ -22,7 +18,7 @@ class SparseTable {
   std::vector<int> a_;
   std::vector<std::vector<std::vector<int>>> m_;
   std::vector<int> flog2_;
-  
+
   void PrecomputeLog();
   void BuildTable();
 };
