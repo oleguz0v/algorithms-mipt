@@ -6,10 +6,6 @@
 #include <iostream>
 
 class QueueWithMin {
- private:
-  std::deque<int> queue_;
-  std::deque<int> minQueue_;
-
  public:
   void Front() const;
   void Size() const;
@@ -17,6 +13,10 @@ class QueueWithMin {
   void Clear();
   void Dequeue();
   void Enqueue(int value);
+
+ private:
+  std::deque<int> queue_;
+  std::deque<int> minQueue_;
 };
 
 void QueueWithMin::Front() const {
