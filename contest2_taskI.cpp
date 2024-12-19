@@ -11,24 +11,25 @@
 #include <algorithm>
 #include <deque>
 #include <iostream>
+#include <queue>
 #include <vector>
 
 class MidDeque {
- private:
-  std::deque<int> first_;
-  std::deque<int> second_;
-
-  void Balance();
-
  public:
   void PushBack(int value);
   void PushMiddle(int value);
   int PopFront();
+
+ private:
+  std::queue<int> first_;
+  std::deque<int> second_;
+
+  void Balance();
 };
 
 void MidDeque::Balance() {
   if (second_.size() > first_.size()) {
-    first_.push_back(second_.front());
+    first_.push(second_.front());
     second_.pop_front();
   }
 }
@@ -45,7 +46,7 @@ void MidDeque::PushMiddle(int value) {
 
 int MidDeque::PopFront() {
   int res = first_.front();
-  first_.pop_front();
+  first_.pop();
   Balance();
   return res;
 }
