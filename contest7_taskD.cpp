@@ -1,4 +1,5 @@
 // Алгоритм Косарайю для нахождения компонент сильной связности
+// Асимптотика: O(n + m), где n — количество вершин, m — количество рёбер
 
 #include <algorithm>
 #include <iostream>
@@ -10,91 +11,89 @@ using std::endl;
 using std::reverse;
 using std::vector;
 
-class KosarajuSCC {
+class Graph {
  public:
-  KosarajuSCC(int n) {
-    size_ = n;
-    col_ = 1;
-    gr_.resize(size_ + 1);
-    grt_.resize(size_ + 1);
-    used_.assign(size_ + 1, false);
-    ans_.resize(size_ + 1);
+  explicit Graph(int vertex_count) {
+    vertex_count_ = vertex_count;
+    adjacency_list_.resize(vertex_count_ + 1);
   }
-
-  void AddEdge(int from, int to) {
-    gr_[from].push_back(to);
-    grt_[to].push_back(from);
+  void AddEdge(int from, int to) { adjacency_list_[from].push_back(to); }
+  int VertexCount() const { return vertex_count_; }
+  const vector<vector<int>>& GetAdjacencyList() const {
+    return adjacency_list_;
   }
-
-  void ComputeSCC() {
-    for (int i = 1; i <= size_; ++i) {
-      if (!used_[i]) {
-        Dfs(i);
+  Graph Transpose() const {
+    Graph transposed(vertex_count_);
+    for (int from = 1; from <= vertex_count_; ++from) {
+      for (int to : adjacency_list_[from]) {
+        transposed.adjacency_list_[to].push_back(from);
       }
     }
-    reverse(order_.begin(), order_.end());
-    used_.assign(size_ + 1, false);
-    for (auto el : order_) {
-      if (!used_[el]) {
-        Dfst(el);
-        ++col_;
-      }
-    }
+    return transposed;
   }
-
-  int GetComponentCount() const { return col_ - 1; }
-
-  void PrintComponents() const {
-    for (int i = 1; i <= size_; ++i) {
-      cout << ans_[i] << ' ';
-    }
-    cout << endl;
-  }
+  friend int CalculateStrongConnectedComponents(const Graph& graph,
+                                                vector<int>& component);
 
  private:
-  int size_;
-  int col_;
-  vector<vector<int>> gr_;
-  vector<vector<int>> grt_;
-  vector<int> ans_;
-  vector<int> order_;
-  vector<bool> used_;
-
-  void Dfs(int ind_now) {
-    used_[ind_now] = true;
-    for (auto el : gr_[ind_now]) {
-      if (!used_[el]) {
-        Dfs(el);
+  int vertex_count_;
+  vector<vector<int>> adjacency_list_;
+  void DFS(int v, vector<bool>& visited, vector<int>& result,
+           int current_component, vector<int>* component) const {
+    visited[v] = true;
+    if (component != nullptr) {
+      (*component)[v] = current_component;
+    }
+    for (int u : adjacency_list_[v]) {
+      if (!visited[u]) {
+        DFS(u, visited, result, current_component, component);
       }
     }
-    order_.push_back(ind_now);
-  }
-
-  void Dfst(int ind_now) {
-    used_[ind_now] = true;
-    ans_[ind_now] = col_;
-    for (auto el : grt_[ind_now]) {
-      if (!used_[el]) {
-        Dfst(el);
-      }
-    }
+    result.push_back(v);
   }
 };
+
+// Основная функция Косарайю
+int CalculateStrongConnectedComponents(const Graph& graph,
+                                       vector<int>& component) {
+  int n = graph.VertexCount();
+  vector<bool> visited(n + 1, false);
+  vector<int> order;
+  for (int i = 1; i <= n; ++i) {
+    if (!visited[i]) {
+      graph.DFS(i, visited, order, -1, nullptr);
+    }
+  }
+  reverse(order.begin(), order.end());
+  Graph transposed = graph.Transpose();
+  visited.assign(n + 1, false);
+  component.assign(n + 1, 0);
+  int comp_id = 1;
+  for (int v : order) {
+    if (!visited[v]) {
+      vector<int> temp;
+      transposed.DFS(v, visited, temp, comp_id, &component);
+      ++comp_id;
+    }
+  }
+  return comp_id - 1;
+}
 
 int main() {
   int n;
   int m;
-  cin >> n;
-  cin >> m;
-  KosarajuSCC scc(n);
+  cin >> n >> m;
+  Graph graph(n);
   for (int i = 0; i < m; ++i) {
-    int a;
-    int b;
-    cin >> a;
-    cin >> b;
-    scc.AddEdge(a, b);
+    int from;
+    int to;
+    cin >> from >> to;
+    graph.AddEdge(from, to);
   }
-  scc.ComputeSCC();
-  cout << scc.GetComponentCount() << endl;
-  scc.PrintComponents();
+  vector<int> component;
+  int total = CalculateStrongConnectedComponents(graph, component);
+  cout << total << endl;
+  for (int i = 1; i <= n; ++i) {
+    cout << component[i] << ' ';
+  }
+  cout << endl;
 }
