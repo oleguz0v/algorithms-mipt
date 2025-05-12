@@ -1,4 +1,4 @@
-// Нахождение мостов в неориентированном графе с помощью DFS
+// Нахождение мостов в неориентированном графе с помощью поиска в глубину (DFS)
 
 #include <algorithm>
 #include <iostream>
@@ -12,83 +12,85 @@ using std::pair;
 using std::sort;
 using std::vector;
 
-class BridgeFinder {
+class Graph {
  public:
-  BridgeFinder(int n, int m) {
-    size_ = n;
-    edges_ = m;
-    gr_.resize(size_ + 1);
-    tup_.resize(size_ + 1);
-    tin_.resize(size_ + 1);
-    used_.resize(size_ + 1);
-    tim_ = 0;
+  explicit Graph(int vertex_count) {
+    vertex_count_ = vertex_count;
+    adjacency_list_.resize(vertex_count_ + 1);
+    entry_time_.resize(vertex_count_ + 1);
+    low_time_.resize(vertex_count_ + 1);
+    visited_.resize(vertex_count_ + 1, false);
+    timer_ = 0;
   }
 
-  void AddEdge(int u, int v, int idx) {
-    gr_[u].push_back({v, idx});
-    gr_[v].push_back({u, idx});
+  void AddEdge(int from, int to, int index) {
+    adjacency_list_[from].push_back({to, index});
+    adjacency_list_[to].push_back({from, index});
   }
 
-  void FindBridges() {
-    for (int i = 1; i <= size_; ++i) {
-      if (!used_[i]) {
-        Dfs(i, -1);
+  vector<int> GetBridges() {
+    bridges_.clear();
+    timer_ = 0;
+    std::fill(visited_.begin(), visited_.end(), false);
+    for (int vertex = 1; vertex <= vertex_count_; ++vertex) {
+      if (!visited_[vertex]) {
+        SearchBridgesDFS(vertex, -1);
       }
     }
-  }
-
-  void PrintBridges() {
-    sort(ans_.begin(), ans_.end());
-    cout << ans_.size() << endl;
-    for (int i = 0; i < (int)ans_.size(); ++i) {
-      cout << ans_[i] + 1 << ' ';
-    }
-    cout << endl;
+    sort(bridges_.begin(), bridges_.end());
+    return bridges_;
   }
 
  private:
-  int size_;
-  int edges_;
-  int tim_;
-  vector<vector<pair<int, int>>> gr_;
-  vector<int> tup_;
-  vector<int> tin_;
-  vector<bool> used_;
-  vector<int> ans_;
+  int vertex_count_;
+  int timer_;
+  vector<vector<pair<int, int>>> adjacency_list_;
+  vector<int> entry_time_;
+  vector<int> low_time_;
+  vector<bool> visited_;
+  vector<int> bridges_;
 
-  void Dfs(int ind_now, int le) {
-    tin_[ind_now] = ++tim_;
-    used_[ind_now] = true;
-    tup_[ind_now] = tin_[ind_now];
-    for (auto el : gr_[ind_now]) {
-      if (el.second != le) {
-        if (used_[el.first]) {
-          tup_[ind_now] = min(tup_[ind_now], tin_[el.first]);
-        } else {
-          Dfs(el.first, el.second);
-          tup_[ind_now] = min(tup_[ind_now], tup_[el.first]);
-          if (tup_[el.first] > tin_[ind_now]) {
-            ans_.push_back(el.second);
-          }
+  void SearchBridgesDFS(int current_vertex, int edge_id_from_parent) {
+    visited_[current_vertex] = true;
+    entry_time_[current_vertex] = low_time_[current_vertex] = ++timer_;
+    for (const auto& [neighbor, edge_id] : adjacency_list_[current_vertex]) {
+      if (edge_id == edge_id_from_parent) {
+        continue;
+      }
+      if (visited_[neighbor]) {
+        low_time_[current_vertex] =
+            min(low_time_[current_vertex], entry_time_[neighbor]);
+      } else {
+        SearchBridgesDFS(neighbor, edge_id);
+        low_time_[current_vertex] =
+            min(low_time_[current_vertex], low_time_[neighbor]);
+        if (low_time_[neighbor] > entry_time_[current_vertex]) {
+          bridges_.push_back(edge_id);
         }
       }
     }
   }
 };
 
-int main() {
-  int n;
-  int m;
-  int a;
-  int b;
-  cin >> n;
-  cin >> m;
-  BridgeFinder solver(n, m);
-  for (int i = 0; i < m; ++i) {
-    cin >> a;
-    cin >> b;
-    solver.AddEdge(a, b, i);
+void SolveBridgeProblem() {
+  int vertex_count;
+  int edge_count;
+  cin >> vertex_count >> edge_count;
+
+  Graph graph(vertex_count);
+  for (int i = 0; i < edge_count; ++i) {
+    int from;
+    int to;
+    cin >> from >> to;
+    graph.AddEdge(from, to, i);
   }
-  solver.FindBridges();
-  solver.PrintBridges();
+
+  vector<int> bridges = graph.GetBridges();
+  cout << bridges.size() << endl;
+  for (int index : bridges) {
+    cout << index + 1 << ' ';
+  }
+  cout << endl;
 }
+
+int main() { SolveBridgeProblem(); }
