@@ -28,17 +28,17 @@ class Graph {
     adjacency_list_[to].push_back({from, index});
   }
 
-  vector<int> GetBridges() {
-    bridges_.clear();
+  const vector<int> GetBridges() {
+    vector<int> bridges;
     timer_ = 0;
     std::fill(visited_.begin(), visited_.end(), false);
     for (int vertex = 1; vertex <= vertex_count_; ++vertex) {
       if (!visited_[vertex]) {
-        SearchBridgesDFS(vertex, -1);
+        SearchBridgesDFS(vertex, -1, bridges);
       }
     }
-    sort(bridges_.begin(), bridges_.end());
-    return bridges_;
+    sort(bridges.begin(), bridges.end());
+    return bridges;
   }
 
  private:
@@ -48,9 +48,10 @@ class Graph {
   vector<int> entry_time_;
   vector<int> low_time_;
   vector<bool> visited_;
-  vector<int> bridges_;
 
-  void SearchBridgesDFS(int current_vertex, int edge_id_from_parent) {
+  // Реализация поиска мостов в графе (поиск в глубину)
+  void SearchBridgesDFS(int current_vertex, int edge_id_from_parent,
+                        vector<int>& bridges) {
     visited_[current_vertex] = true;
     entry_time_[current_vertex] = low_time_[current_vertex] = ++timer_;
     for (const auto& [neighbor, edge_id] : adjacency_list_[current_vertex]) {
@@ -61,18 +62,19 @@ class Graph {
         low_time_[current_vertex] =
             min(low_time_[current_vertex], entry_time_[neighbor]);
       } else {
-        SearchBridgesDFS(neighbor, edge_id);
+        SearchBridgesDFS(neighbor, edge_id, bridges);
         low_time_[current_vertex] =
             min(low_time_[current_vertex], low_time_[neighbor]);
         if (low_time_[neighbor] > entry_time_[current_vertex]) {
-          bridges_.push_back(edge_id);
+          bridges.push_back(edge_id);
         }
       }
     }
   }
 };
 
-void SolveBridgeProblem() {
+// Основная функция для нахождения мостов
+void FindBridgesInGraph() {
   int vertex_count;
   int edge_count;
   cin >> vertex_count >> edge_count;
@@ -93,4 +95,4 @@ void SolveBridgeProblem() {
   cout << endl;
 }
 
-int main() { SolveBridgeProblem(); }
+int main() { FindBridgesInGraph(); }
