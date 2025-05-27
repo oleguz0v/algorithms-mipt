@@ -22,7 +22,7 @@ class Graph {
 
   int VertexCount() const { return vertex_count_; }
 
-  vector<int>& GetNeighbors(int vertex_id) {
+  const vector<int>& GetNeighbors(int vertex_id) const {
     return adjacency_list_[vertex_id];
   }
 
@@ -41,7 +41,7 @@ class Graph {
   vector<vector<int>> adjacency_list_;
 };
 
-void GetOrderOfTheVertexesForKosaraju(Graph& graph, int v,
+void GetOrderOfTheVertexesForKosaraju(const Graph& graph, int v,
                                       vector<bool>& visited,
                                       vector<int>& result,
                                       int current_component,
@@ -60,7 +60,7 @@ void GetOrderOfTheVertexesForKosaraju(Graph& graph, int v,
 }
 
 // Основная функция Косарайю
-int CalculateStrongConnectedComponents(Graph& graph, vector<int>& component) {
+int CalculateStrongConnectedComponents(const Graph& graph, vector<int>& component) {
   int n = graph.VertexCount();
   vector<bool> visited(n + 1, false);
   vector<int> order;
