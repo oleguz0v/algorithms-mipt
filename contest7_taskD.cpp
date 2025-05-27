@@ -22,8 +22,8 @@ class Graph {
 
   int VertexCount() const { return vertex_count_; }
 
-  const vector<vector<int>>& GetAdjacencyList() const {
-    return adjacency_list_;
+  vector<int>& GetNeighbors(int vertex_id) {
+    return adjacency_list_[vertex_id];
   }
 
   Graph Transpose() const {
@@ -50,7 +50,7 @@ void GetOrderOfTheVertexesForKosaraju(Graph& graph, int v,
   if (component != nullptr) {
     (*component)[v] = current_component;
   }
-  for (int u : graph.GetAdjacencyList()[v]) {
+  for (int u : graph.GetNeighbors(v)) {
     if (!visited[u]) {
       GetOrderOfTheVertexesForKosaraju(graph, u, visited, result,
                                        current_component, component);
