@@ -36,28 +36,31 @@ class Graph {
     return transposed;
   }
 
-  void DepthFirstSearch(int v, vector<bool>& visited, vector<int>& result,
-                        int current_component, vector<int>* component) const {
-    visited[v] = true;
-    if (component != nullptr) {
-      (*component)[v] = current_component;
-    }
-    for (int u : adjacency_list_[v]) {
-      if (!visited[u]) {
-        DepthFirstSearch(u, visited, result, current_component, component);
-      }
-    }
-    result.push_back(v);
-  }
-
  private:
   int vertex_count_;
   vector<vector<int>> adjacency_list_;
 };
 
+void GetOrderOfTheVertexesForKosaraju(Graph& graph, int v,
+                                      vector<bool>& visited,
+                                      vector<int>& result,
+                                      int current_component,
+                                      vector<int>* component) {
+  visited[v] = true;
+  if (component != nullptr) {
+    (*component)[v] = current_component;
+  }
+  for (int u : graph.GetAdjacencyList()[v]) {
+    if (!visited[u]) {
+      GetOrderOfTheVertexesForKosaraju(graph, u, visited, result,
+                                       current_component, component);
+    }
+  }
+  result.push_back(v);
+}
+
 // Основная функция Косарайю
-int CalculateStrongConnectedComponents(const Graph& graph,
-                                       vector<int>& component) {
+int CalculateStrongConnectedComponents(Graph& graph, vector<int>& component) {
   int n = graph.VertexCount();
   vector<bool> visited(n + 1, false);
   vector<int> order;
@@ -65,7 +68,7 @@ int CalculateStrongConnectedComponents(const Graph& graph,
   // Заполнение order с использованием поиска в глубину (DFS)
   for (int i = 1; i <= n; ++i) {
     if (!visited[i]) {
-      graph.DepthFirstSearch(i, visited, order, -1, nullptr);
+      GetOrderOfTheVertexesForKosaraju(graph, i, visited, order, -1, nullptr);
     }
   }
 
@@ -83,7 +86,8 @@ int CalculateStrongConnectedComponents(const Graph& graph,
   for (int v : order) {
     if (!visited[v]) {
       vector<int> temp;
-      transposed.DepthFirstSearch(v, visited, temp, comp_id, &component);
+      GetOrderOfTheVertexesForKosaraju(transposed, v, visited, temp, comp_id,
+                                       &component);
       ++comp_id;
     }
   }
@@ -118,4 +122,3 @@ int main() {
 
   return 0;
 }
-
